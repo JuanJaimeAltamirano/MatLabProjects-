@@ -1,0 +1,13 @@
+function [tau,k,t0]=tiempo_muerto(t,y,u)
+% datos experimentales
+%t tiempo
+%u salto en escalon
+y=y-y(1,1);  %variable de desviacion recorre la grafica al origen 
+Dy=y(end,1);
+k=Dy/u;
+y=abs(y/Dy);
+t0283=interp1(y,t,0.283,'cubic');
+t0632=interp1(y,t,0.632,'cubic');
+tau=1.5*(t0632-t0283);
+t0=t0632-tau;
+end 
