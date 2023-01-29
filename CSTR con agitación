@@ -1,0 +1,33 @@
+function SAL_MODELADO
+clc 
+close all
+%Intervalos de integración
+tint = [0,60];
+%Condiciones iniciales
+h0 = [1000,200,800]; %m
+%Método para resolver
+[T,X]=ode45(@(t,x)Modelo1(t,x),tint,h0); 
+figure(1)
+y=X(:,2);
+z=X(:,3);
+a=X(:,1);
+hold on
+plot(T,y)  
+xlabel('tiempo,h')
+ylabel('FLUJOS')
+plot(T,z);
+plot(T,a);
+legend('A','B','W')
+grid on
+end 
+ 
+function dxdt=Modelo1 (~,x)
+W=x(1)
+A=x(2);
+B=x(3);
+dWdt=10;
+dAdt=2-10*A/W;
+dBdt=18-10*B/W;
+dxdt=[dWdt;dAdt;dBdt];
+ 
+end 
