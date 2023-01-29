@@ -1,0 +1,43 @@
+function Tanque_de_nivel_No_Isotermico_Modelado
+clc 
+close all
+%Parámetros
+At = 10; % m^2
+Fi = 0.10;% m^3/s
+g = 9.81; %m/s^2
+Av = 0.01; %m^2
+beta = Av*sqrt(2*g);
+C = 4184; %J/kg*∫C
+Uref = 2; %J/kg
+Rho = 1000; %kg/m^3
+Pref = 101325; %Pa
+Href = Uref+Pref/Rho; 
+Ti = 25; 
+%Intervalos de integración
+tint = [0,3600*7];
+%Condiciones iniciales
+X0 = [1,50]; %altura inicial, temperatura inicial
+%Método para resolver
+[T,X]=ode45(@(t,x)Modelo2(t,x,Fi,beta,At,C,Ti,Href,Uref,Rho),tint,X0);     
+%Gráficas
+figure(1)
+plot(T/3600,X(:,1)) 
+xlabel('tiempo,h')
+ylabel('altura,m')
+grid on 
+figure(2)
+plot(T/3600,X(:,2))
+xlabel('tiempo,h')
+ylabel('temperatura,ºC')
+grid on 
+end 
+ 
+function dxdt=Modelo2 (t,x,Fi,beta,At,C,Ti,Href,Uref,Rho)
+h=x(1);
+T=x(2);
+Q = 2e7*(1-exp(-t)); %calor cambia con respecto al tiempo
+dhdt = (Fi-beta*sqrt(h))/At;
+dTdt=(Fi/(At*C*h))*(C*(Ti-T)+Href-Uref)-(beta/(C*At*sqrt(h)))*(Href
+Uref)+(Q/(Rho*At*h*C));
+dxdt=[dhdt;dTdt];
+end 
