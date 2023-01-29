@@ -1,0 +1,26 @@
+function Tanque_de_nivel_MODELADO
+clc 
+close all
+%Parámetros
+At = 10; % m^2
+Fi = 0.10; % m^3/s
+g = 9.81; %m/s^2
+Av = 0.01; %m^2
+beta = Av*sqrt(2*g);
+%Intervalos de integración
+tint = [0,3600*7];
+%Condiciones iniciales
+h0 = 1; %m
+%Método para resolver
+[T,H]=ode45(@(t,h)Modelo1(t,h,Fi,beta,At),tint,h0);
+%Gráficas
+figure(1)
+plot(T/3600,H)  
+xlabel('tiempo,h')
+ylabel('altura,m')
+grid on 
+end 
+ 
+function dhdt=Modelo1 (~,h,Fi,beta,At)
+dhdt = (Fi-beta*sqrt(h))/At;
+end 
