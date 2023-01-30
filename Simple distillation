@@ -1,0 +1,40 @@
+function destilación_por_lotes
+ 
+%Parámetros
+clc
+Tint=[0,1000]; %tiempo de integración
+Cini=[0.79,50]; % x(0) L(0)
+ 
+%Método para resolver
+[t,x]=ode23tb(@(t,x)modelo5(t,x),Tint,Cini); 
+%Gráficas
+figure(1)
+%plot()
+figure(1)
+plot(t,x(:,1))
+xlabel('tiempo,h')
+ylabel('X')
+figure(2)
+plot(t,x(:,2))
+xlabel('tiempo,h')
+ylabel('L')
+ end
+ 
+function dxdt=modelo5(t,x)
+X=x(1);
+L=x(2);
+ 
+alpha=4.182318;
+y=(alpha*X)/(1+(alpha-1)*X);
+Ch=[191.5329,-665.9193,1077.2,-1353.6]; %KJ/Kmol*s
+CH=[-135.8355,88.9897,-177.3952,198.00075,5677.22587];
+cH= polyval(CH,y); %Polinomio simbólico J/Kmol*K
+ch=polyval(Ch,X);
+Q=5*sin(t/10)+10; %KJ/s
+pdh=[-543.342,266.9691,-354.7904,198.008];
+pdhdx=polyval(pdh,X);
+ 
+dXdt=Q/(L*(1/(y-X))*(ch-cH)+pdhdx);
+dLdt=Q/((ch-cH)+(y-X)*pdhdx);
+dxdt=[dXdt;dLdt];
+end 
