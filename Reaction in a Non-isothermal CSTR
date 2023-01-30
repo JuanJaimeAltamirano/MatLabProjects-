@@ -1,0 +1,79 @@
+function  Reactor_Inerte_Continuo
+
+%PARÁMETROS 
+clc
+CI0= 110; %mol/m^3
+CA0= 100; %mol/m^3
+v0= 16.7e-3; %m^3/s 
+V=3; %m^3
+Q= 20000; %J/s
+Tref=27; %∫C
+Ti=30; %∫C
+alpha=[-1;1];
+theta=[1;0];
+Cp=[50;50];%J/mol*K
+CpI=80;
+Cv=0.95*Cp;
+CvI= 0.95*CpI;
+Uref=[50000;45000]; %J/mol
+UrefI=0; 
+P=101325;
+Rho= 1000*(1000/18); %mol/m^3
+Href=Uref+P/Rho;
+HrefI=UrefI+P/Rho; 
+tau=V/v0; %s
+k1=0.828; %m^3/mol*s
+T1=20+273;
+k2=0.001;
+T2=45+273.15;
+ER=log(k2/k1)/(1/T1-1/T2);
+a=k1*exp(ER/T1);
+ 
+%INTERVALO DE INTEGRACIÓN
+Tint=[0,280*3];
+ 
+%CONDICIONES INICIALES 
+X0=[0,800,80];  %X(0), CI(0), T0(0)
+ 
+%MÉTODO
+[T,X]=ode45(@(t,x)modelo4(t,x,a,ER,CA0,tau,CI0,theta,alpha,Cv,CvI,Href,HrefI,Cp,CpI,Tref,Ti,Uref,UrefI,Q,V),Tint,X0);
+ 
+
+%GRÁFICO
+for i=1:1:3
+    figure(i)
+    plot(T,X(:,i))
+    grid on
+end
+end 
+ 
+function dxdt=modelo4(~,x,a,ER,CA0,tau,CI0,theta,alpha,Cv,CvI,Href,HrefI,Cp,CpI,Tref,Ti,Uref,UrefI,Q,V)
+X=x(1);
+CI=x(2);
+T=x(3);
+ 
+k=a*exp(-ER/(T+273.15));
+rA=k*CA0^2*(1-X)^2;
+C=CA0*(theta+alpha*X);
+beta=C'*Cv+CI*CvI;
+ 
+hi=Href+Cp*(Ti-Tref);
+hiI=HrefI+CpI*(Ti-Tref);
+h=Href+Cp*(T-Tref);
+hI=HrefI+CpI*(T-Tref);
+ 
+u=Uref+Cv*(T-Tref);
+uI=UrefI+CvI*(T-Tref);
+ 
+A=(CA0/tau)*theta'*(hi-h);
+B=(CI0/tau)*(hiI-hI);
+D=-(CA0*X/tau)*alpha'*(h-u);
+E=-(CI/tau)*(hI-uI);
+F=Q/V-u'*alpha*rA;
+ 
+dXdt=-X/tau+rA/CA0;
+dCIdt=(CI0-CI)/tau;
+dTdt=(1/beta)*(A+B+D+E+F);
+ 
+dxdt=[dXdt;dCIdt;dTdt];
+end 
