@@ -1,0 +1,51 @@
+Function Tanque_de_Nivel_No_Isotermico_Densidad_Y_Area_Variable_Modelado
+clc 
+close all
+%Parámetros
+Fi = 0.10;% m^3/s
+g = 9.81; %m/s^2
+Av = 0.01; %m^2
+beta = Av*sqrt(2*g);
+Tref = 4+273.15;
+Uref = 0; %J/kg
+Rho = 1000; %kg/m^3
+Pref = 101325; %Pa
+Href = Uref+Pref/Rho; 
+Ti = 25+273.15; 
+[Rhoi,~]=densidad(Ti);
+[~,Hi,~]=energia(Ti,Tref,Uref,Href);
+R=5;
+Ht=20;
+alpha=pi*(R/Ht)^2;
+%Intervalos de integración
+Tint = [0,3600*3]; %s
+%Condiciones iniciales
+X0 = [1,50+273.15]; %m,ºC
+%Método para resolver
+[T,X]=ode15s(@(t,x)modelo3(t,x,Fi,beta,Tref,Href,Uref,Rhoi,Hi,alpha),Tint,X0);    
+%Gráficas
+figure(1)
+plot(T/3600,X(:,1)) 
+xlabel('tiempo,h')
+ylabel('altura,m')
+grid on 
+figure(2)
+plot(T/3600,X(:,2)) 
+xlabel('tiempo,h')
+ylabel('temperatura,ºC')
+grid on 
+end 
+ 
+function dxdt=modelo3(t,x,Fi,beta,Tref,Href,Uref,Rhoi,Hi,alpha)
+h=x(1); %h altura
+T=x(2); %T temperatura 
+Q=2e7*(1-exp(-t)); %calor cambia con respecto al tiempo
+V=(1/3)*alpha*h^2;
+[Rho,dRhodT]=densidad(T);
+[U,H,Cv]=energia(T,Tref,Uref,Href);
+Cv=polyval(Cv,T);
+dTdt=(Rhoi*Fi/(Rho*Cv*V))*(Hi-U)-(beta*sqrt(h)/(Cv*V))*(H-U)+Q/(Rho*Cv*V);
+dhdt=(Fi*Rhoi-Rho*beta*sqrt(h)-dRhodT*V*dTdt)/(alpha*Rho*h^2);
+dxdt=[dhdt;dTdt];
+end 
+ 
