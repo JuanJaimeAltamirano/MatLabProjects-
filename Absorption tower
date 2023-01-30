@@ -1,0 +1,75 @@
+function Absorcion_2
+ 
+clc 
+close all 
+hold on
+%Parámetros
+P=1.5; %atm
+rhoa=798; %Kg/m3
+rhoc=998; %Kg/m3
+Vn=1.5; %m3
+Vm=1.5*1000; %m3
+PMa=46;%kg/Kmol
+PMc=18;%kg/Kmol
+Va=PMa/rhoa;%Vol.especifico
+Vc=PMc/rhoc;%Vol.especifico
+L2=150; %Kmol/hr.
+G1=67.3; %Kmol/hr.
+X2=0;
+Y1=0.12;
+ 
+R=0.08206; %(m3*atm/kmol*K)
+T=25+273.15; %K
+%Intervalo de interación
+Tint=[0,1];%hr. 
+%Condiciones iniciales
+X0=0;
+ 
+[time,X]=ode45(@(t,x)modelo6(t,x,P,Va,Vc,Vn,Vm,G1,L2,X2,Y1,T,R,0),Tint,X0); %RungeKutam»todo245(modificado)
+n=length(X);
+G=zeros(n,1);
+L=zeros(n,1);
+for i=1:1:n
+    G(i)=modelo6(time(i,1),X(i,1),P,Va,Vc,Vn,Vm,G1,L2,X2,Y1,T,R,1); 
+    L(i)=modelo6(time(i,1),X(i,1),P,Va,Vc,Vn,Vm,G1,L2,X2,Y1,T,R,2); 
+end
+ 
+%Gráficas
+figure(1)
+plot(time,X)
+xlabel('Tiempo')
+ylabel('Concentración')
+grid on
+figure(2)
+plot(time,G)
+xlabel('Tiempo')
+ylabel('Flujo GAS')
+hold on
+grid on
+figure(3)
+plot(time,L)
+xlabel('Tiempo')
+ylabel('Flujo LIQ.')
+hold on
+grid on
+end
+
+function dxdt=modelo6(~,x,P,Va,Vc,Vn,Vm,G1,L2,X2,Y1,T,R,w) 
+y=0.4*(1-exp(-x/(1-x)));
+dydx=(1.0873*exp(1/(x-1)))/(x-1)^2;
+M=(P*Vm)/(R*T); 
+N=(Vn/((x*Va)+(Vc)*(1-x)));
+dxdt=(((L2*((X2-x)/(1-x)))+G1*((Y1-y)/(1-y)))/((N/(1-x))+((M/1-y)*dydx)));
+if w==1;
+    G=G1*((1-Y1)/(1-y))+M*dydx*dxdt;
+    dxdt=G;   
+end
+if w==2
+    dNdx=-((Va-Vc)*Vn)/((Va-Vc)*x+Vc)^2;
+    L=L2*((1-X2))/(1-x)-(1/1-x)*(((1-x)*dNdx)-N)*dxdt;
+    
+    dxdt=L;
+    
+end
+ 
+end
