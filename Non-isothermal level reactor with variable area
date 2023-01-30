@@ -48,4 +48,26 @@ dTdt=(Rhoi*Fi/(Rho*Cv*V))*(Hi-U)-(beta*sqrt(h)/(Cv*V))*(H-U)+Q/(Rho*Cv*V);
 dhdt=(Fi*Rhoi-Rho*beta*sqrt(h)-dRhodT*V*dTdt)/(alpha*Rho*h^2);
 dxdt=[dhdt;dTdt];
 end 
+function [Rho,dRhodT]=densidad(T)
+if  T<=333.15
+    C=[5.459,.30542,647.13,0.081];
+else 
+    C=[4.969,2.7788e-1,647.13,1.8704e-1];
+end 
+Rho=C(1)*C(2)^(-(1+(1-T/C(3))^(C(4))));
+dRhodT=Rho*C(4)*log(C(2))*(1-T/C(3))^(C(4)-1)/(C(3));
+end 
+function [U,H,cv]=energia(T,Tref,Uref,Href)
+cp=[9.37e-6,-1.4116e-2,8.125,-2.0901e3,2.7637e5]; 
+cv=0.95*cp;
+Cp=poly2sym(cp); J/Kmol*K
+Cv=poly2sym(cv);
+intCp=int(Cp);
+intCv=int(Cv);
+ 
+H=Href+double(subs(intCp,T)-subs(intCp,Tref));
+U=Uref+double(subs(intCv,T)-subs(intCv,Tref));
+end 
+
+
  
