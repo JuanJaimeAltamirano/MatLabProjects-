@@ -1,0 +1,29 @@
+function CIRCUITO
+clc 
+close all
+%Intervalos de integración
+tint = [0,60];
+%Condiciones iniciales
+T0 = [0,0]; 
+%Método para resolver
+[T,X]=ode45(@(t,x)Modelo1(t,x),tint,T0);     
+figure(1)
+xlabel('tiempo,s')
+ylabel('carga,C')
+hold on 
+plot(T,X(:,1));
+legend('Carga');
+grid on 
+end 
+ 
+function dxdt=Modelo1 (~,x)
+L=0.3;
+v=125;
+R=0.1;
+c=.000005;
+i=x(1);
+q=x(2);
+didt=(1/L)*(v-R*i-q/c);
+dqdt=i;
+dxdt=[didt;dqdt];
+end 
