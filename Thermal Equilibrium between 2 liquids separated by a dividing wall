@@ -1,0 +1,35 @@
+function EQUILIBRIO_TERMICO_LL
+clc 
+%Intervalos de integración
+tint = [0,30];
+%Condiciones iniciales
+T0 = [10,90]; %ºC
+%Método para resolver
+[T,X]=ode45(@(t,x)Modelo1(t,x),tint,T0);
+
+% Graficas 
+figure(1);
+B1=X(:,2);
+A1=X(:,1);
+hold on 
+xlabel('tiempo,s')
+ylabel('Temperatura,∫C')
+plot(T,A1);
+plot(T,B1);
+legend('Alpha','Beta')
+grid on 
+end 
+
+function dxdt=Modelo1 (~,x)
+UA=1; %J/s
+MB=18; %AGUA
+MA=18; %AGUA
+CVB=4.18;
+CVA=4.18;
+TA=x(1);
+TB=x(2);
+dTAdt=UA*(TA-TB)/MA*CVA;
+dTBdt=-UA*(TA-TB)/MB*CVB;
+dxdt=[dTAdt;dTBdt];
+end 
+
